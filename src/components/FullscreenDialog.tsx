@@ -3,6 +3,9 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+  VisuallyHidden,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AppHeader } from "@/components/AppHeader";
@@ -37,6 +40,12 @@ export function FullscreenDialog({
         className="h-screen max-w-none w-screen p-0 gap-0 flex flex-col top-0 left-0 translate-x-0 translate-y-0 rounded-none"
         showCloseButton={false}
       >
+        <VisuallyHidden>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>
+            {title} dialog
+          </DialogDescription>
+        </VisuallyHidden>
         <AppHeader
           left={
             <Button variant="ghost" size="sm" onClick={onCancel}>

@@ -89,7 +89,14 @@ function SortableListItem({
 }
 
 export function ListsPage() {
-  const { lists, reorderLists, addList, addItem, defaultListId, setDefaultListId } = useLists();
+  const {
+    lists,
+    reorderLists,
+    addList,
+    addItem,
+    defaultListId,
+    setDefaultListId,
+  } = useLists();
   const { theme, setTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -100,7 +107,9 @@ export function ListsPage() {
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
 
   const sortedLists = [...lists].sort((a, b) => a.order - b.order);
-  const defaultList = defaultListId ? lists.find(l => l.id === defaultListId) : sortedLists[0];
+  const defaultList = defaultListId
+    ? lists.find((l) => l.id === defaultListId)
+    : sortedLists[0];
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -139,7 +148,10 @@ export function ListsPage() {
     }
   };
 
-  const handleItemKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleItemKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
     if (e.key === "Enter") {
       e.preventDefault();
       const currentText = newItemTexts[index];
@@ -209,7 +221,9 @@ export function ListsPage() {
 
               {/* Default List Setting */}
               <div className="flex items-center justify-between px-4 py-3 border-b">
-                <Label htmlFor="default-list" className="text-base font-normal">Default List</Label>
+                <Label htmlFor="default-list" className="text-base font-normal">
+                  Default List
+                </Label>
                 <Select
                   value={defaultListId ?? ""}
                   onValueChange={(value) => setDefaultListId(value || null)}
@@ -266,20 +280,20 @@ export function ListsPage() {
       <AppFooter>
         {/* Add List Button */}
         <FullscreenDialog
-            open={isListDialogOpen}
-            onOpenChange={setIsListDialogOpen}
-            title="Add New List"
-            onCancel={() => setIsListDialogOpen(false)}
-            onDone={handleAddList}
-            doneDisabled={!newListName.trim()}
-            trigger={
-              <Button variant="ghost" size="icon">
-                <ListPlus className="h-5 w-5" />
-              </Button>
-            }
-          >
-            <div className="p-4 space-y-2">
-              <Label htmlFor="list-name">List Name</Label>
+          open={isListDialogOpen}
+          onOpenChange={setIsListDialogOpen}
+          title="Add New List"
+          onCancel={() => setIsListDialogOpen(false)}
+          onDone={handleAddList}
+          doneDisabled={!newListName.trim()}
+          trigger={
+            <Button variant="ghost" size="icon">
+              <ListPlus className="h-5 w-5" />
+            </Button>
+          }
+        >
+          <div className="p-4">
+            <div className="bg-background rounded-lg border overflow-hidden">
               <Input
                 id="list-name"
                 placeholder="e.g. Shopping, Work Tasks..."
@@ -291,87 +305,93 @@ export function ListsPage() {
                   }
                 }}
                 autoFocus
+                className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 h-auto bg-transparent rounded-none"
               />
             </div>
-          </FullscreenDialog>
+          </div>
+        </FullscreenDialog>
 
-          {/* Add Item Button */}
-          <FullscreenDialog
-            open={isItemDialogOpen}
-            onOpenChange={(open) => {
-              setIsItemDialogOpen(open);
-              if (open) {
-                // Set default list when opening dialog
-                setSelectedListId(defaultList?.id ?? sortedLists[0]?.id ?? null);
-                setNewItemTexts([""]);
-              }
-            }}
-            title="Add Items"
-            onCancel={() => {
-              setIsItemDialogOpen(false);
+        {/* Add Item Button */}
+        <FullscreenDialog
+          open={isItemDialogOpen}
+          onOpenChange={(open) => {
+            setIsItemDialogOpen(open);
+            if (open) {
+              // Set default list when opening dialog
+              setSelectedListId(defaultList?.id ?? sortedLists[0]?.id ?? null);
               setNewItemTexts([""]);
-            }}
-            onDone={handleAddItems}
-            doneDisabled={!selectedListId || !newItemTexts.some(t => t.trim())}
-            trigger={
-              <Button variant="ghost" size="icon" disabled={sortedLists.length === 0}>
-                <Plus className="h-5 w-5" />
-              </Button>
             }
-          >
-            <div className="space-y-4">
-              <div className="px-4 pt-4">
-                <div className="bg-background rounded-lg border overflow-hidden">
-                  {newItemTexts.map((text, index) => (
-                    <div key={index}>
-                      <Input
-                        placeholder="e.g. Milk, Bread..."
-                        value={text}
-                        onChange={(e) => updateItemText(index, e.target.value)}
-                        onKeyDown={(e) => handleItemKeyDown(index, e)}
-                        autoFocus={index === newItemTexts.length - 1}
-                        className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 h-auto bg-transparent rounded-none"
-                      />
-                      {index < newItemTexts.length - 1 && <Separator />}
-                    </div>
-                  ))}
-                  <Separator />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-full rounded-none"
-                    onClick={addNewItemInput}
-                    disabled={newItemTexts.some(text => text.trim() === "")}
-                  >
-                    Add another item
-                  </Button>
-                </div>
-              </div>
-
-              <div className="px-4">
-                <div className="bg-background rounded-lg border overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-base">Add To</span>
-                    <Select
-                      value={selectedListId ?? ""}
-                      onValueChange={(value) => setSelectedListId(value || null)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select a list" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sortedLists.map((list) => (
-                          <SelectItem key={list.id} value={list.id}>
-                            {list.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+          }}
+          title="Add Items"
+          onCancel={() => {
+            setIsItemDialogOpen(false);
+            setNewItemTexts([""]);
+          }}
+          onDone={handleAddItems}
+          doneDisabled={!selectedListId || !newItemTexts.some((t) => t.trim())}
+          trigger={
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={sortedLists.length === 0}
+            >
+              <Plus className="h-5 w-5" />
+            </Button>
+          }
+        >
+          <div className="space-y-4">
+            <div className="px-4 pt-4">
+              <div className="bg-background rounded-lg border overflow-hidden">
+                {newItemTexts.map((text, index) => (
+                  <div key={index}>
+                    <Input
+                      placeholder="e.g. Milk, Bread..."
+                      value={text}
+                      onChange={(e) => updateItemText(index, e.target.value)}
+                      onKeyDown={(e) => handleItemKeyDown(index, e)}
+                      autoFocus={index === newItemTexts.length - 1}
+                      className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 h-auto bg-transparent rounded-none"
+                    />
+                    {index < newItemTexts.length - 1 && <Separator />}
                   </div>
+                ))}
+                <Separator />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full rounded-none"
+                  onClick={addNewItemInput}
+                  disabled={newItemTexts.some((text) => text.trim() === "")}
+                >
+                  Add another item
+                </Button>
+              </div>
+            </div>
+
+            <div className="px-4">
+              <div className="bg-background rounded-lg border overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-base">Add To</span>
+                  <Select
+                    value={selectedListId ?? ""}
+                    onValueChange={(value) => setSelectedListId(value || null)}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select a list" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sortedLists.map((list) => (
+                        <SelectItem key={list.id} value={list.id}>
+                          {list.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
-          </FullscreenDialog>
+          </div>
+        </FullscreenDialog>
       </AppFooter>
     </div>
   );
