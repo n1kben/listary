@@ -413,19 +413,37 @@ export function ListsPage() {
 
       {/* Bottom Bar */}
       <AppFooter>
-        {isEditing && selectedLists.size > 0 ? (
-          <div className="flex-1 flex justify-center">
-            {/* Remove button */}
-            <Button
-              variant="ghost"
-              size="header-ios"
-              onClick={handleDeleteSelected}
-              className="text-destructive hover:text-destructive"
-            >
-              <Trash2 className="mr-2" />
-              Remove
-            </Button>
-          </div>
+        {isEditing ? (
+          selectedLists.size > 0 ? (
+            <div className="flex-1 flex justify-center">
+              {/* Delete (n) button */}
+              <Button
+                variant="ghost"
+                size="header-ios"
+                onClick={handleDeleteSelected}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="mr-2" />
+                Delete ({selectedLists.size})
+              </Button>
+            </div>
+          ) : (
+            <div className="flex-1 flex justify-center">
+              {/* Delete All button */}
+              <Button
+                variant="ghost"
+                size="header-ios"
+                onClick={() => {
+                  deleteLists(sortedLists.map(l => l.id));
+                  setIsEditing(false);
+                }}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="mr-2" />
+                Delete All
+              </Button>
+            </div>
+          )
         ) : (
           <>
             {/* Add List Button */}
