@@ -1,0 +1,2 @@
+- Use shadcn for ui
+- After every major change run `pnpm check`
