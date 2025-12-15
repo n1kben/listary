@@ -10,11 +10,11 @@ export function AppHeader({ left, center, right }: AppHeaderProps) {
   return (
     <>
       <header className="shrink-0 border-b bg-background box-border fixed w-full">
-        <div className="flex items-center justify-between h-26 items-end">
-          <div className="flex items-center justify-between w-full">
-            <div>{left}</div>
-            <div>{center}</div>
-            <div>{right}</div>
+        <div className="flex items-end h-26">
+          <div className="grid grid-cols-3 items-center w-full">
+            <div className="justify-self-start">{left}</div>
+            <div className="justify-self-center">{center}</div>
+            <div className="justify-self-end">{right}</div>
           </div>
         </div>
       </header>

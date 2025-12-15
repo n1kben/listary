@@ -32,6 +32,13 @@ import {
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+import {
   DndContext,
   closestCenter,
   PointerSensor,
@@ -113,7 +120,7 @@ function SortableListItem({
           <div
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing p-1 shrink-0 touch-none"
+            className="cursor-grab active:cursor-grabbing shrink-0 touch-none"
           >
             <DragHandle className="text-muted-foreground" />
           </div>
@@ -140,6 +147,10 @@ export function ListsPage() {
     deleteLists,
     defaultListId,
     setDefaultListId,
+    newListPlacement,
+    setNewListPlacement,
+    newItemPlacement,
+    setNewItemPlacement,
   } = useLists();
   const { theme, setTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
@@ -284,6 +295,54 @@ export function ListsPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* New List Placement Setting */}
+              <div className="flex items-center justify-between px-4 py-3 border-b">
+                <Label
+                  htmlFor="new-list-placement"
+                  className="text-base font-normal"
+                >
+                  New Lists Appear
+                </Label>
+                <Select
+                  value={newListPlacement}
+                  onValueChange={(value) =>
+                    setNewListPlacement(value as "top" | "bottom")
+                  }
+                >
+                  <SelectTrigger id="new-list-placement" className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="top">At Top</SelectItem>
+                    <SelectItem value="bottom">At Bottom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* New Item Placement Setting */}
+              <div className="flex items-center justify-between px-4 py-3 border-b">
+                <Label
+                  htmlFor="new-item-placement"
+                  className="text-base font-normal"
+                >
+                  New Items Appear
+                </Label>
+                <Select
+                  value={newItemPlacement}
+                  onValueChange={(value) =>
+                    setNewItemPlacement(value as "top" | "bottom")
+                  }
+                >
+                  <SelectTrigger id="new-item-placement" className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="top">At Top</SelectItem>
+                    <SelectItem value="bottom">At Bottom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </FullscreenDialog>
         }
@@ -300,30 +359,45 @@ export function ListsPage() {
       />
 
       {/* Lists */}
-      <main className="container max-w-2xl px-0 flex-1 scrollable-content">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-          modifiers={[restrictToVerticalAxis]}
-        >
-          <SortableContext
-            items={sortedLists.map((l) => l.id)}
-            strategy={verticalListSortingStrategy}
+      <main className="max-w-2xl px-0 flex-1">
+        {sortedLists.length === 0 ? (
+          <Empty className="border-0">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ListIcon />
+              </EmptyMedia>
+              <EmptyTitle>No Lists Yet</EmptyTitle>
+              <EmptyDescription>
+                Get started by creating your first list. Tap the plus button
+                below to begin.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
           >
-            {sortedLists.map((list) => (
-              <SortableListItem
-                key={list.id}
-                list={list}
-                isEditing={isEditing}
-                onEdit={setEditingListId}
-                isSelected={selectedLists.has(list.id)}
-                onToggleSelect={handleToggleSelect}
-                isDefault={list.id === defaultListId}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+            <SortableContext
+              items={sortedLists.map((l) => l.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              {sortedLists.map((list) => (
+                <SortableListItem
+                  key={list.id}
+                  list={list}
+                  isEditing={isEditing}
+                  onEdit={setEditingListId}
+                  isSelected={selectedLists.has(list.id)}
+                  onToggleSelect={handleToggleSelect}
+                  isDefault={list.id === defaultListId}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        )}
       </main>
 
       {/* Edit List Dialog */}
@@ -363,10 +437,7 @@ export function ListsPage() {
               onDone={handleAddList}
               doneDisabled={!newListName.trim()}
               trigger={
-                <Button
-                  variant="ghost"
-                  size="header-icon-ios"
-                >
+                <Button variant="ghost" size="header-icon-ios">
                   <ListPlus className="size-5" />
                 </Button>
               }

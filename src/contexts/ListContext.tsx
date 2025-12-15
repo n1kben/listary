@@ -1,12 +1,16 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import type { List, ListItem } from '@/types';
+import type { List, ListItem, PlacementPosition } from '@/types';
 
 interface ListContextType {
   lists: List[];
   defaultListId: string | null;
   setDefaultListId: (id: string | null) => void;
+  newListPlacement: PlacementPosition;
+  setNewListPlacement: (position: PlacementPosition) => void;
+  newItemPlacement: PlacementPosition;
+  setNewItemPlacement: (position: PlacementPosition) => void;
   addList: (name: string) => void;
   deleteList: (id: string) => void;
   deleteLists: (ids: string[]) => void;
@@ -72,6 +76,8 @@ const INITIAL_LISTS: List[] = [
 export function ListProvider({ children }: { children: ReactNode }) {
   const [lists, setLists] = useLocalStorage<List[]>('listary-lists', INITIAL_LISTS);
   const [defaultListId, setDefaultListId] = useLocalStorage<string | null>('listary-default-list', null);
+  const [newListPlacement, setNewListPlacement] = useLocalStorage<PlacementPosition>('listary-new-list-placement', 'bottom');
+  const [newItemPlacement, setNewItemPlacement] = useLocalStorage<PlacementPosition>('listary-new-item-placement', 'bottom');
 
   const addList = (name: string) => {
     // Assign a random color from the palette
@@ -80,10 +86,18 @@ export function ListProvider({ children }: { children: ReactNode }) {
       id: Date.now().toString(),
       name,
       color: randomColor,
-      order: lists.length,
+      order: newListPlacement === 'top' ? 0 : lists.length,
       items: [],
     };
-    setLists([...lists, newList]);
+
+    if (newListPlacement === 'top') {
+      // Add to top and reorder existing lists
+      const updatedLists = lists.map(list => ({ ...list, order: list.order + 1 }));
+      setLists([newList, ...updatedLists]);
+    } else {
+      // Add to bottom (default behavior)
+      setLists([...lists, newList]);
+    }
   };
 
   const deleteList = (id: string) => {
@@ -112,9 +126,17 @@ export function ListProvider({ children }: { children: ReactNode }) {
             id: uniqueId,
             text,
             completed: false,
-            order: list.items.length,
+            order: newItemPlacement === 'top' ? 0 : list.items.length,
           };
-          return { ...list, items: [...list.items, newItem] };
+
+          if (newItemPlacement === 'top') {
+            // Add to top and reorder existing items
+            const updatedItems = list.items.map(item => ({ ...item, order: item.order + 1 }));
+            return { ...list, items: [newItem, ...updatedItems] };
+          } else {
+            // Add to bottom (default behavior)
+            return { ...list, items: [...list.items, newItem] };
+          }
         }
         return list;
       })
@@ -129,9 +151,20 @@ export function ListProvider({ children }: { children: ReactNode }) {
             id: `${listId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             text,
             completed: false,
-            order: list.items.length + index,
+            order: newItemPlacement === 'top' ? index : list.items.length + index,
           }));
-          return { ...list, items: [...list.items, ...newItems] };
+
+          if (newItemPlacement === 'top') {
+            // Add to top and reorder existing items
+            const updatedItems = list.items.map(item => ({
+              ...item,
+              order: item.order + newItems.length
+            }));
+            return { ...list, items: [...newItems, ...updatedItems] };
+          } else {
+            // Add to bottom (default behavior)
+            return { ...list, items: [...list.items, ...newItems] };
+          }
         }
         return list;
       })
@@ -233,10 +266,10 @@ export function ListProvider({ children }: { children: ReactNode }) {
       const itemsToMove = fromList.items.filter(item => itemIds.includes(item.id));
 
       // Create new items with new IDs for the target list
-      const newItems: ListItem[] = itemsToMove.map(item => ({
+      const newItems: ListItem[] = itemsToMove.map((item, index) => ({
         ...item,
         id: `${toListId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        order: toList.items.length + itemsToMove.indexOf(item),
+        order: newItemPlacement === 'top' ? index : toList.items.length + index,
       }));
 
       return prevLists.map(list => {
@@ -248,11 +281,23 @@ export function ListProvider({ children }: { children: ReactNode }) {
           };
         }
         if (list.id === toListId) {
-          // Add items to target list
-          return {
-            ...list,
-            items: [...list.items, ...newItems],
-          };
+          if (newItemPlacement === 'top') {
+            // Add to top and reorder existing items
+            const updatedItems = list.items.map(item => ({
+              ...item,
+              order: item.order + newItems.length
+            }));
+            return {
+              ...list,
+              items: [...newItems, ...updatedItems],
+            };
+          } else {
+            // Add to bottom (default behavior)
+            return {
+              ...list,
+              items: [...list.items, ...newItems],
+            };
+          }
         }
         return list;
       });
@@ -265,6 +310,10 @@ export function ListProvider({ children }: { children: ReactNode }) {
         lists,
         defaultListId,
         setDefaultListId,
+        newListPlacement,
+        setNewListPlacement,
+        newItemPlacement,
+        setNewItemPlacement,
         addList,
         deleteList,
         deleteLists,

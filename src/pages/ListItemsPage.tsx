@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2, Check, MoveRight, CheckCheck, X } from "lucide-react";
+import { ArrowLeft, Trash2, MoveRight, ListTodo } from "lucide-react";
 import { useLists } from "@/contexts/ListContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
@@ -109,7 +110,7 @@ function SortableItem({
 export function ListItemsPage() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
-  const { lists, addItems, toggleItem, deleteItems, reorderItems, moveItems, updateItems, updateItem } = useLists();
+  const { lists, addItems, toggleItem, deleteItems, reorderItems, moveItems, updateItem } = useLists();
   const [isEditing, setIsEditing] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -181,49 +182,24 @@ export function ListItemsPage() {
     setIsEditing(false);
   };
 
-  const handleToggleCompleteSelected = () => {
-    // Check if all selected items are completed
-    const selectedItemsArray = Array.from(selectedItems);
-    const allCompleted = selectedItemsArray.every(itemId => {
-      const item = list.items.find(i => i.id === itemId);
-      return item?.completed;
-    });
-
-    // Toggle: if all are completed, uncomplete them; otherwise complete them
-    updateItems(list.id, selectedItemsArray, { completed: !allCompleted });
-    setSelectedItems(new Set());
-    setIsEditing(false);
-  };
-
-  const handleCompleteAll = () => {
-    // Mark all items as completed
-    const allItemIds = sortedItems.map(item => item.id);
-    updateItems(list.id, allItemIds, { completed: true });
-    setIsEditing(false);
-  };
-
-  const handleUncompleteAll = () => {
-    // Mark all items as uncompleted
-    const allItemIds = sortedItems.map(item => item.id);
-    updateItems(list.id, allItemIds, { completed: false });
-    setIsEditing(false);
-  };
-
-  const handleClearCompleted = () => {
-    // Delete all completed items
-    const completedItemIds = completedItems.map((item) => item.id);
-    deleteItems(list.id, completedItemIds);
-    setIsEditing(false);
-  };
-
   const handleMoveSelected = () => {
     if (targetListId && targetListId !== list.id) {
-      moveItems(list.id, targetListId, Array.from(selectedItems));
+      const itemsToMove = selectedItems.size > 0
+        ? Array.from(selectedItems)
+        : sortedItems.map(item => item.id);
+
+      moveItems(list.id, targetListId, itemsToMove);
       setSelectedItems(new Set());
       setIsMoveDialogOpen(false);
       setTargetListId("");
       setIsEditing(false);
     }
+  };
+
+  const handleDeleteAll = () => {
+    const allItemIds = sortedItems.map(item => item.id);
+    deleteItems(list.id, allItemIds);
+    setIsEditing(false);
   };
 
   const handleEditingChange = (editing: boolean) => {
@@ -244,15 +220,6 @@ export function ListItemsPage() {
     }
   };
 
-  // Check if all selected items are completed
-  const allSelectedCompleted = Array.from(selectedItems).every(itemId => {
-    const item = list.items.find(i => i.id === itemId);
-    return item?.completed;
-  });
-
-  // Check if there are any completed items
-  const hasCompletedItems = sortedItems.some(item => item.completed);
-  const hasUncompletedItems = sortedItems.some(item => !item.completed);
 
   return (
     <>
@@ -277,73 +244,89 @@ export function ListItemsPage() {
 
       {/* Items */}
       <main className="container max-w-2xl px-0 flex-1 scrollable-content">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-          modifiers={[restrictToVerticalAxis]}
-        >
-          {/* Active Items */}
-          <SortableContext
-            items={activeItems.map((i) => i.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {activeItems.map((item) => (
-              <SortableItem
-                key={item.id}
-                item={item}
-                isEditing={isEditing}
-                onToggle={() => toggleItem(list.id, item.id)}
-                isSelected={selectedItems.has(item.id)}
-                onToggleSelect={handleToggleSelect}
-                onEditItem={handleEditItem}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-
-        {/* Hide/Show Completed Toggle */}
-        {completedItems.length > 0 && (
+        {activeItems.length === 0 && completedItems.length === 0 ? (
+          <Empty className="border-0">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ListTodo />
+              </EmptyMedia>
+              <EmptyTitle>No Items Yet</EmptyTitle>
+              <EmptyDescription>
+                Start adding items to your list. Tap the plus button below to add your first item.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
           <>
-            <Separator />
-            <Button
-              variant="ghost"
-              className="w-full justify-center h-auto py-3 rounded-none text-muted-foreground"
-              onClick={() => setHideCompleted(!hideCompleted)}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
             >
-              {hideCompleted
-                ? `Show ${completedItems.length} Completed Item${completedItems.length === 1 ? "" : "s"}`
-                : `Hide ${completedItems.length} Completed Item${completedItems.length === 1 ? "" : "s"}`}
-            </Button>
-            <Separator />
-          </>
-        )}
+              {/* Active Items */}
+              <SortableContext
+                items={activeItems.map((i) => i.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {activeItems.map((item) => (
+                  <SortableItem
+                    key={item.id}
+                    item={item}
+                    isEditing={isEditing}
+                    onToggle={() => toggleItem(list.id, item.id)}
+                    isSelected={selectedItems.has(item.id)}
+                    onToggleSelect={handleToggleSelect}
+                    onEditItem={handleEditItem}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
 
-        {/* Completed Items */}
-        {!hideCompleted && completedItems.length > 0 && (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
-          >
-            <SortableContext
-              items={completedItems.map((i) => i.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              {completedItems.map((item) => (
-                <SortableItem
-                  key={item.id}
-                  item={item}
-                  isEditing={isEditing}
-                  onToggle={() => toggleItem(list.id, item.id)}
-                  isSelected={selectedItems.has(item.id)}
-                  onToggleSelect={handleToggleSelect}
-                  onEditItem={handleEditItem}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+            {/* Hide/Show Completed Toggle */}
+            {completedItems.length > 0 && (
+              <>
+                <Separator />
+                <Button
+                  variant="ghost"
+                  className="w-full justify-center h-auto py-3 rounded-none text-muted-foreground"
+                  onClick={() => setHideCompleted(!hideCompleted)}
+                >
+                  {hideCompleted
+                    ? `Show ${completedItems.length} Completed Item${completedItems.length === 1 ? "" : "s"}`
+                    : `Hide ${completedItems.length} Completed Item${completedItems.length === 1 ? "" : "s"}`}
+                </Button>
+                <Separator />
+              </>
+            )}
+
+            {/* Completed Items */}
+            {!hideCompleted && completedItems.length > 0 && (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                modifiers={[restrictToVerticalAxis]}
+              >
+                <SortableContext
+                  items={completedItems.map((i) => i.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {completedItems.map((item) => (
+                    <SortableItem
+                      key={item.id}
+                      item={item}
+                      isEditing={isEditing}
+                      onToggle={() => toggleItem(list.id, item.id)}
+                      isSelected={selectedItems.has(item.id)}
+                      onToggleSelect={handleToggleSelect}
+                      onEditItem={handleEditItem}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            )}
+          </>
         )}
       </main>
 
@@ -352,27 +335,17 @@ export function ListItemsPage() {
         {isEditing ? (
           selectedItems.size > 0 ? (
             <div className="flex-1 flex justify-center items-center gap-2">
-              {/* Complete/Uncomplete selected button */}
-              <Button
-                variant="ghost"
-                size="header-ios"
-                onClick={handleToggleCompleteSelected}
-              >
-                <Check className="mr-2" />
-                {allSelectedCompleted ? "Uncomplete" : "Complete"}
-              </Button>
-
-              {/* Move selected button */}
+              {/* Move (n) button */}
               <Button
                 variant="ghost"
                 size="header-ios"
                 onClick={() => setIsMoveDialogOpen(true)}
               >
                 <MoveRight className="mr-2" />
-                Move
+                Move ({selectedItems.size})
               </Button>
 
-              {/* Remove all selected button */}
+              {/* Delete (n) button */}
               <Button
                 variant="ghost"
                 size="header-ios"
@@ -380,43 +353,31 @@ export function ListItemsPage() {
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="mr-2" />
-                Remove
+                Delete ({selectedItems.size})
               </Button>
             </div>
           ) : (
             <div className="flex-1 flex justify-center items-center gap-2">
-              {/* Complete/Incomplete toggle button */}
-              {hasUncompletedItems ? (
-                <Button
-                  variant="ghost"
-                  size="header-ios"
-                  onClick={handleCompleteAll}
-                >
-                  <CheckCheck className="mr-2" />
-                  Complete (All)
-                </Button>
-              ) : hasCompletedItems ? (
-                <Button
-                  variant="ghost"
-                  size="header-ios"
-                  onClick={handleUncompleteAll}
-                >
-                  <X className="mr-2" />
-                  Uncomplete (All)
-                </Button>
-              ) : null}
+              {/* Move All button */}
+              <Button
+                variant="ghost"
+                size="header-ios"
+                onClick={() => setIsMoveDialogOpen(true)}
+              >
+                <MoveRight className="mr-2" />
+                Move All
+              </Button>
 
-              {/* Clear Completed button */}
-              {hasCompletedItems && (
-                <Button
-                  variant="ghost"
-                  size="header-ios"
-                  onClick={handleClearCompleted}
-                >
-                  <X className="mr-2" />
-                  Clear Completed
-                </Button>
-              )}
+              {/* Delete All button */}
+              <Button
+                variant="ghost"
+                size="header-ios"
+                onClick={handleDeleteAll}
+                className="text-destructive hover:text-destructive"
+              >
+                <Trash2 className="mr-2" />
+                Delete All
+              </Button>
             </div>
           )
         ) : (
@@ -445,7 +406,10 @@ export function ListItemsPage() {
       >
         <div className="p-4">
           <div className="mb-4 text-sm text-muted-foreground">
-            Move {selectedItems.size} item{selectedItems.size === 1 ? '' : 's'} to:
+            {selectedItems.size > 0
+              ? `Move ${selectedItems.size} item${selectedItems.size === 1 ? '' : 's'} to:`
+              : `Move all ${sortedItems.length} item${sortedItems.length === 1 ? '' : 's'} to:`
+            }
           </div>
           <Select value={targetListId} onValueChange={setTargetListId}>
             <SelectTrigger className="w-full">

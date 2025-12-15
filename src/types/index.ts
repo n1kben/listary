@@ -12,3 +12,5 @@ export interface List {
   order: number;
   items: ListItem[];
 }
+
+export type PlacementPosition = 'top' | 'bottom';
