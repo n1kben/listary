@@ -5,8 +5,9 @@ import { ArrowLeft, Plus, Edit3, Check, Trash2 } from 'lucide-react';
 import { useLists } from '@/contexts/ListContext';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { AppHeader } from '@/components/AppHeader';
+import { FullscreenDialog } from '@/components/FullscreenDialog';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
@@ -140,40 +141,23 @@ export function ListItemsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="sticky top-0 z-10" style={{ backgroundColor: list.color }}>
-        <div className="max-w-2xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => navigate('/')}
-              className="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-6 h-6" />
-            </button>
-            <Button
-              variant={isEditing ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setIsEditing(!isEditing)}
-              className="text-white hover:bg-white/20"
-            >
-              {isEditing ? (
-                <>
-                  <Check className="w-4 h-4 mr-2" />
-                  Done
-                </>
-              ) : (
-                <>
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit
-                </>
-              )}
-            </Button>
-          </div>
-          <h1 className="text-3xl font-bold text-white mb-2">{list.name}</h1>
-          <p className="text-white/90">
-            {completedCount} of {totalCount} completed
-          </p>
-        </div>
-      </div>
+      <AppHeader
+        left={
+          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        }
+        center={<h1 className="text-lg font-semibold">{list.name}</h1>}
+        right={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? "Done" : "Edit"}
+          </Button>
+        }
+      />
 
       {/* Items */}
       <div className="max-w-2xl mx-auto px-4 py-6">
@@ -195,8 +179,14 @@ export function ListItemsPage() {
         </DndContext>
 
         {/* Add Item Button */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+        <FullscreenDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          title="Add New Item"
+          onCancel={() => setIsDialogOpen(false)}
+          onDone={handleAddItem}
+          doneDisabled={!newItemText.trim()}
+          trigger={
             <motion.button
               className="w-full rounded-xl p-4 border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors flex items-center justify-center gap-2 text-gray-600 hover:text-gray-700 mt-4"
               whileTap={{ scale: 0.98 }}
@@ -204,30 +194,22 @@ export function ListItemsPage() {
               <Plus className="w-5 h-5" />
               <span className="font-medium">Add Item</span>
             </motion.button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Item</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <Input
-                placeholder="Item name..."
-                value={newItemText}
-                onChange={(e) => setNewItemText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddItem();
-                  }
-                }}
-                autoFocus
-              />
-              <div className="flex gap-2">
-                <Button onClick={handleAddItem} className="flex-1">Add</Button>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">Cancel</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+          }
+        >
+          <div className="p-4">
+            <Input
+              placeholder="Item name..."
+              value={newItemText}
+              onChange={(e) => setNewItemText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newItemText.trim()) {
+                  handleAddItem();
+                }
+              }}
+              autoFocus
+            />
+          </div>
+        </FullscreenDialog>
       </div>
     </div>
   );

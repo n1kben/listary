@@ -4,7 +4,9 @@ import type { List, ListItem } from '@/types';
 
 interface ListContextType {
   lists: List[];
-  addList: (name: string, color: string) => void;
+  defaultListId: string | null;
+  setDefaultListId: (id: string | null) => void;
+  addList: (name: string) => void;
   deleteList: (id: string) => void;
   updateList: (id: string, updates: Partial<List>) => void;
   reorderLists: (lists: List[]) => void;
@@ -16,6 +18,17 @@ interface ListContextType {
 }
 
 const ListContext = createContext<ListContextType | undefined>(undefined);
+
+const COLORS = [
+  "#FF6B6B",
+  "#4ECDC4",
+  "#95E1D3",
+  "#FFD93D",
+  "#6BCF7F",
+  "#A78BFA",
+  "#FFA07A",
+  "#87CEEB",
+];
 
 const INITIAL_LISTS: List[] = [
   {
@@ -52,12 +65,15 @@ const INITIAL_LISTS: List[] = [
 
 export function ListProvider({ children }: { children: ReactNode }) {
   const [lists, setLists] = useLocalStorage<List[]>('listary-lists', INITIAL_LISTS);
+  const [defaultListId, setDefaultListId] = useLocalStorage<string | null>('listary-default-list', null);
 
-  const addList = (name: string, color: string) => {
+  const addList = (name: string) => {
+    // Assign a random color from the palette
+    const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)] ?? "#FF6B6B";
     const newList: List = {
       id: Date.now().toString(),
       name,
-      color,
+      color: randomColor,
       order: lists.length,
       items: [],
     };
@@ -154,6 +170,8 @@ export function ListProvider({ children }: { children: ReactNode }) {
     <ListContext.Provider
       value={{
         lists,
+        defaultListId,
+        setDefaultListId,
         addList,
         deleteList,
         updateList,
