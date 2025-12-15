@@ -8,6 +8,7 @@ import {
   VisuallyHidden,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { ClickableArea } from "@/components/ui/clickable-area";
 import { AppHeader } from "@/components/AppHeader";
 
 interface FullscreenDialogProps {
@@ -42,9 +43,7 @@ export function FullscreenDialog({
       >
         <VisuallyHidden>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            {title} dialog
-          </DialogDescription>
+          <DialogDescription>{title} dialog</DialogDescription>
         </VisuallyHidden>
         <AppHeader
           left={
@@ -54,7 +53,12 @@ export function FullscreenDialog({
           }
           center={<h1 className="text-lg font-semibold">{title}</h1>}
           right={
-            <Button size="header-ios" onClick={onDone} disabled={doneDisabled}>
+            <Button
+              variant="ghost"
+              size="header-ios"
+              disabled={doneDisabled}
+              onClick={onDone}
+            >
               {doneText}
             </Button>
           }
