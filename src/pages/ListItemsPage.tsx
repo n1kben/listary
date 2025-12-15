@@ -72,9 +72,10 @@ function SortableItem({
           <>
             <Checkbox checked={item.completed} onCheckedChange={onToggle} className="h-5 w-5" />
             <span
-              className={`flex-1 ml-3 ${
+              className={`flex-1 ml-3 cursor-pointer ${
                 item.completed ? "line-through text-muted-foreground" : ""
               }`}
+              onClick={() => onEditItem(item)}
             >
               {item.text}
             </span>

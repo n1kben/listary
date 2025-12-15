@@ -339,6 +339,7 @@ export function ListsPage() {
               variant="ghost"
               size="sm"
               onClick={handleDeleteSelected}
+              className="text-destructive hover:text-destructive"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Remove
