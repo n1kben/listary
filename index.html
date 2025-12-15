@@ -34,6 +34,16 @@
           root.classList.add(systemTheme);
         }
       })();
+
+      // Fix iOS 100vh issue by using window.innerHeight
+      function setAppHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+      }
+
+      setAppHeight();
+      window.addEventListener('resize', setAppHeight);
+      window.addEventListener('orientationchange', setAppHeight);
     </script>
   </head>
   <body>
