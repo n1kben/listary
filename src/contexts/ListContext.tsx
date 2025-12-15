@@ -11,10 +11,13 @@ interface ListContextType {
   updateList: (id: string, updates: Partial<List>) => void;
   reorderLists: (lists: List[]) => void;
   addItem: (listId: string, text: string) => void;
+  addItems: (listId: string, texts: string[]) => void;
   deleteItem: (listId: string, itemId: string) => void;
   toggleItem: (listId: string, itemId: string) => void;
   updateItem: (listId: string, itemId: string, updates: Partial<ListItem>) => void;
+  updateItems: (listId: string, itemIds: string[], updates: Partial<ListItem>) => void;
   reorderItems: (listId: string, items: ListItem[]) => void;
+  moveItems: (fromListId: string, toListId: string, itemIds: string[]) => void;
 }
 
 const ListContext = createContext<ListContextType | undefined>(undefined);
@@ -93,16 +96,35 @@ export function ListProvider({ children }: { children: ReactNode }) {
   };
 
   const addItem = (listId: string, text: string) => {
-    setLists(
-      lists.map(list => {
+    setLists(prevLists =>
+      prevLists.map(list => {
         if (list.id === listId) {
+          // Use timestamp + random string to ensure unique IDs
+          const uniqueId = `${listId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
           const newItem: ListItem = {
-            id: `${listId}-${Date.now()}`,
+            id: uniqueId,
             text,
             completed: false,
             order: list.items.length,
           };
           return { ...list, items: [...list.items, newItem] };
+        }
+        return list;
+      })
+    );
+  };
+
+  const addItems = (listId: string, texts: string[]) => {
+    setLists(prevLists =>
+      prevLists.map(list => {
+        if (list.id === listId) {
+          const newItems: ListItem[] = texts.map((text, index) => ({
+            id: `${listId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+            text,
+            completed: false,
+            order: list.items.length + index,
+          }));
+          return { ...list, items: [...list.items, ...newItems] };
         }
         return list;
       })
@@ -137,13 +159,29 @@ export function ListProvider({ children }: { children: ReactNode }) {
   };
 
   const updateItem = (listId: string, itemId: string, updates: Partial<ListItem>) => {
-    setLists(
-      lists.map(list => {
+    setLists(prevLists =>
+      prevLists.map(list => {
         if (list.id === listId) {
           return {
             ...list,
             items: list.items.map(item =>
               item.id === itemId ? { ...item, ...updates } : item
+            ),
+          };
+        }
+        return list;
+      })
+    );
+  };
+
+  const updateItems = (listId: string, itemIds: string[], updates: Partial<ListItem>) => {
+    setLists(prevLists =>
+      prevLists.map(list => {
+        if (list.id === listId) {
+          return {
+            ...list,
+            items: list.items.map(item =>
+              itemIds.includes(item.id) ? { ...item, ...updates } : item
             ),
           };
         }
@@ -166,6 +204,43 @@ export function ListProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const moveItems = (fromListId: string, toListId: string, itemIds: string[]) => {
+    setLists(prevLists => {
+      const fromList = prevLists.find(list => list.id === fromListId);
+      const toList = prevLists.find(list => list.id === toListId);
+
+      if (!fromList || !toList) return prevLists;
+
+      // Get the items to move
+      const itemsToMove = fromList.items.filter(item => itemIds.includes(item.id));
+
+      // Create new items with new IDs for the target list
+      const newItems: ListItem[] = itemsToMove.map(item => ({
+        ...item,
+        id: `${toListId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        order: toList.items.length + itemsToMove.indexOf(item),
+      }));
+
+      return prevLists.map(list => {
+        if (list.id === fromListId) {
+          // Remove items from source list
+          return {
+            ...list,
+            items: list.items.filter(item => !itemIds.includes(item.id)),
+          };
+        }
+        if (list.id === toListId) {
+          // Add items to target list
+          return {
+            ...list,
+            items: [...list.items, ...newItems],
+          };
+        }
+        return list;
+      });
+    });
+  };
+
   return (
     <ListContext.Provider
       value={{
@@ -177,10 +252,13 @@ export function ListProvider({ children }: { children: ReactNode }) {
         updateList,
         reorderLists,
         addItem,
+        addItems,
         deleteItem,
         toggleItem,
         updateItem,
+        updateItems,
         reorderItems,
+        moveItems,
       }}
     >
       {children}
