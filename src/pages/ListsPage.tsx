@@ -359,7 +359,7 @@ export function ListsPage() {
       />
 
       {/* Lists */}
-      <main className="max-w-2xl px-0 flex-1">
+      <main className="pt-26 pb-22 px-0 flex-1">
         {sortedLists.length === 0 ? (
           <Empty className="border-0">
             <EmptyHeader>

@@ -18,8 +18,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+  EmptyDescription,
+} from "@/components/ui/empty";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
@@ -67,7 +79,11 @@ function SortableItem({
       <div className="w-full flex items-center h-auto py-3 px-4 select-none">
         {!isEditing ? (
           <>
-            <Checkbox checked={item.completed} onCheckedChange={onToggle} className="h-5 w-5" />
+            <Checkbox
+              checked={item.completed}
+              onCheckedChange={onToggle}
+              className="h-5 w-5"
+            />
             <span
               className={`flex-1 ml-3 cursor-pointer ${
                 item.completed ? "line-through text-muted-foreground" : ""
@@ -95,7 +111,7 @@ function SortableItem({
             <div
               {...attributes}
               {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 shrink-0 touch-none"
+              className="cursor-grab active:cursor-grabbing shrink-0 touch-none"
             >
               <DragHandle className="text-muted-foreground" />
             </div>
@@ -110,7 +126,15 @@ function SortableItem({
 export function ListItemsPage() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
-  const { lists, addItems, toggleItem, deleteItems, reorderItems, moveItems, updateItem } = useLists();
+  const {
+    lists,
+    addItems,
+    toggleItem,
+    deleteItems,
+    reorderItems,
+    moveItems,
+    updateItem,
+  } = useLists();
   const [isEditing, setIsEditing] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -124,7 +148,7 @@ export function ListItemsPage() {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   const list = lists.find((l) => l.id === listId);
@@ -184,9 +208,10 @@ export function ListItemsPage() {
 
   const handleMoveSelected = () => {
     if (targetListId && targetListId !== list.id) {
-      const itemsToMove = selectedItems.size > 0
-        ? Array.from(selectedItems)
-        : sortedItems.map(item => item.id);
+      const itemsToMove =
+        selectedItems.size > 0
+          ? Array.from(selectedItems)
+          : sortedItems.map((item) => item.id);
 
       moveItems(list.id, targetListId, itemsToMove);
       setSelectedItems(new Set());
@@ -197,7 +222,7 @@ export function ListItemsPage() {
   };
 
   const handleDeleteAll = () => {
-    const allItemIds = sortedItems.map(item => item.id);
+    const allItemIds = sortedItems.map((item) => item.id);
     deleteItems(list.id, allItemIds);
     setIsEditing(false);
   };
@@ -220,13 +245,16 @@ export function ListItemsPage() {
     }
   };
 
-
   return (
     <>
       {/* Header */}
       <AppHeader
         left={
-          <Button variant="ghost" size="header-icon-ios" onClick={() => navigate("/")}>
+          <Button
+            variant="ghost"
+            size="header-icon-ios"
+            onClick={() => navigate("/")}
+          >
             <ArrowLeft className="size-5" />
           </Button>
         }
@@ -243,7 +271,7 @@ export function ListItemsPage() {
       />
 
       {/* Items */}
-      <main className="container max-w-2xl px-0 flex-1 scrollable-content">
+      <main className="pt-26 pb-22 px-0 flex-1">
         {activeItems.length === 0 && completedItems.length === 0 ? (
           <Empty className="border-0">
             <EmptyHeader>
@@ -252,7 +280,8 @@ export function ListItemsPage() {
               </EmptyMedia>
               <EmptyTitle>No Items Yet</EmptyTitle>
               <EmptyDescription>
-                Start adding items to your list. Tap the plus button below to add your first item.
+                Start adding items to your list. Tap the plus button below to
+                add your first item.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -407,9 +436,8 @@ export function ListItemsPage() {
         <div className="p-4">
           <div className="mb-4 text-sm text-muted-foreground">
             {selectedItems.size > 0
-              ? `Move ${selectedItems.size} item${selectedItems.size === 1 ? '' : 's'} to:`
-              : `Move all ${sortedItems.length} item${sortedItems.length === 1 ? '' : 's'} to:`
-            }
+              ? `Move ${selectedItems.size} item${selectedItems.size === 1 ? "" : "s"} to:`
+              : `Move all ${sortedItems.length} item${sortedItems.length === 1 ? "" : "s"} to:`}
           </div>
           <Select value={targetListId} onValueChange={setTargetListId}>
             <SelectTrigger className="w-full">

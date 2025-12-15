@@ -64,7 +64,7 @@ export function FullscreenDialog({
         />
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        <div className="pt-26 pb-22 flex-1 overflow-y-auto">{children}</div>
       </DialogContent>
     </Dialog>
   );
