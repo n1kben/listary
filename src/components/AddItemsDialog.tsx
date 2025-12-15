@@ -29,7 +29,6 @@ export function AddItemsDialog({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newItemTexts, setNewItemTexts] = useState<string[]>([""]);
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
-  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
   const sortedLists = [...lists].sort((a, b) => a.order - b.order);
 
@@ -72,13 +71,6 @@ export function AddItemsDialog({
     setNewItemTexts(updated);
   };
 
-  const handleFocus = (index: number) => {
-    setFocusedIndex(index);
-  };
-
-  const handleBlur = () => {
-    setFocusedIndex(null);
-  };
 
   return (
     <FullscreenDialog
@@ -116,8 +108,6 @@ export function AddItemsDialog({
                   value={text}
                   onChange={(e) => updateItemText(index, e.target.value)}
                   onKeyDown={(e) => handleItemKeyDown(index, e)}
-                  onFocus={() => handleFocus(index)}
-                  onBlur={handleBlur}
                   autoFocus={index === newItemTexts.length - 1}
                   className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 h-auto bg-transparent rounded-none"
                 />

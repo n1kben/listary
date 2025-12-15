@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2, Pencil, Check, MoveRight, CheckCheck, X } from "lucide-react";
+import { ArrowLeft, Trash2, Check, MoveRight, CheckCheck, X } from "lucide-react";
 import { useLists } from "@/contexts/ListContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -30,20 +30,16 @@ import { CSS } from "@dnd-kit/utilities";
 import type { ListItem } from "@/types";
 
 function SortableItem({
-  listId,
   item,
   isEditing,
   onToggle,
-  onDelete,
   isSelected,
   onToggleSelect,
   onEditItem,
 }: {
-  listId: string;
   item: ListItem;
   isEditing: boolean;
   onToggle: () => void;
-  onDelete: () => void;
   isSelected: boolean;
   onToggleSelect: (itemId: string) => void;
   onEditItem: (item: ListItem) => void;
@@ -250,9 +246,6 @@ export function ListItemsPage() {
     }
   };
 
-  const completedCount = sortedItems.filter((item) => item.completed).length;
-  const totalCount = sortedItems.length;
-
   // Check if all selected items are completed
   const allSelectedCompleted = Array.from(selectedItems).every(itemId => {
     const item = list.items.find(i => i.id === itemId);
@@ -300,11 +293,9 @@ export function ListItemsPage() {
             {activeItems.map((item) => (
               <SortableItem
                 key={item.id}
-                listId={list.id}
                 item={item}
                 isEditing={isEditing}
                 onToggle={() => toggleItem(list.id, item.id)}
-                onDelete={() => deleteItem(list.id, item.id)}
                 isSelected={selectedItems.has(item.id)}
                 onToggleSelect={handleToggleSelect}
                 onEditItem={handleEditItem}
@@ -345,11 +336,9 @@ export function ListItemsPage() {
               {completedItems.map((item) => (
                 <SortableItem
                   key={item.id}
-                  listId={list.id}
                   item={item}
                   isEditing={isEditing}
                   onToggle={() => toggleItem(list.id, item.id)}
-                  onDelete={() => deleteItem(list.id, item.id)}
                   isSelected={selectedItems.has(item.id)}
                   onToggleSelect={handleToggleSelect}
                   onEditItem={handleEditItem}

@@ -7,8 +7,6 @@ import {
   List as ListIcon,
   ListPlus,
   Trash2,
-  Pencil,
-  X,
 } from "lucide-react";
 import { useLists } from "@/contexts/ListContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -32,7 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";

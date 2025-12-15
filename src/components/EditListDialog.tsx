@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FullscreenDialog } from './FullscreenDialog';
 import { Input } from './ui/input';
 
@@ -19,9 +19,13 @@ export function EditListDialog({
 }: EditListDialogProps) {
   const [name, setName] = useState(currentName);
 
-  useEffect(() => {
-    setName(currentName);
-  }, [currentName, open]);
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      // Reset the name when dialog opens
+      setName(currentName);
+    }
+    onOpenChange(isOpen);
+  };
 
   const handleDone = () => {
     if (name.trim()) {
@@ -38,7 +42,7 @@ export function EditListDialog({
   return (
     <FullscreenDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={handleOpenChange}
       title="Edit List"
       onCancel={handleCancel}
       onDone={handleDone}
