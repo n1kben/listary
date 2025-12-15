@@ -1,13 +1,20 @@
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-/* The Golden Rule: Only one element should scroll. Never let body scroll. */
+/* Re-enable text selection for inputs */
+input,
+textarea,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 html, body {
-  height: 100%;
   margin: 0;
-  overflow: hidden; /* IMPORTANT */
 }
 
 body {
@@ -19,17 +26,9 @@ body {
 }
 
 #root {
-  height: 100dvh; /* dynamic viewport */
   display: flex;
   flex-direction: column;
   background: var(--color-background);
-}
-
-/* The ONLY scrolling area */
-.scrollable-content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* smooth momentum scroll */
 }
 
 /* Prevent text selection during drag */
