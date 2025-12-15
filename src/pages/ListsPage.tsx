@@ -292,7 +292,7 @@ export function ListsPage() {
       />
 
       {/* Lists */}
-      <main className="container max-w-2xl px-0 flex-1 overflow-y-auto">
+      <main className="container max-w-2xl px-0 flex-1 scrollable-content">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
