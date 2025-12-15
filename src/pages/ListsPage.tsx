@@ -164,9 +164,10 @@ export function ListsPage() {
 
       const newLists = [...sortedLists];
       const [movedList] = newLists.splice(oldIndex, 1);
-      newLists.splice(newIndex, 0, movedList);
-
-      reorderLists(newLists);
+      if (movedList) {
+        newLists.splice(newIndex, 0, movedList);
+        reorderLists(newLists);
+      }
     }
   };
 

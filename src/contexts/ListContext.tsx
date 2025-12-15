@@ -1,4 +1,5 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext } from 'react';
+import type { ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import type { List, ListItem } from '@/types';
 

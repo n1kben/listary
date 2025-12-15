@@ -152,9 +152,10 @@ export function ListItemsPage() {
 
       const newItems = [...sortedItems];
       const [movedItem] = newItems.splice(oldIndex, 1);
-      newItems.splice(newIndex, 0, movedItem);
-
-      reorderItems(list.id, newItems);
+      if (movedItem) {
+        newItems.splice(newIndex, 0, movedItem);
+        reorderItems(list.id, newItems);
+      }
     }
   };
 
