@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 interface AppFooterProps {
   children: ReactNode;
@@ -6,11 +6,12 @@ interface AppFooterProps {
 
 export function AppFooter({ children }: AppFooterProps) {
   return (
-    <>
-      <div className="h-15"></div>
-      <footer className="shrink-0 border-t bg-card box-border h-[calc(theme(spacing.15)+env(safe-area-inset-bottom))] fixed bottom-0 w-full">
-        <div className="flex justify-between items-center h-15">{children}</div>
-      </footer>
-    </>
+    <footer className="shrink-0 border-t bg-background box-border fixed bottom-0 left-0 right-0">
+      <div className="flex items-start h-22">
+        <div className="flex items-center justify-between w-full">
+          {children}
+        </div>
+      </div>
+    </footer>
   );
 }
