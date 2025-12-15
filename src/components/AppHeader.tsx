@@ -8,7 +8,7 @@ interface AppHeaderProps {
 
 export function AppHeader({ left, center, right }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur">
+    <header className="flex-none border-b bg-background pt-[env(safe-area-inset-top)]">
       <div className="flex items-center justify-between p-2">
         <div>{left}</div>
         <div>{center}</div>

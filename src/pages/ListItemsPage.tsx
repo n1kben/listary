@@ -258,7 +258,7 @@ export function ListItemsPage() {
   const hasUncompletedItems = sortedItems.some(item => !item.completed);
 
   return (
-    <div className="min-h-screen pb-14">
+    <div className="flex flex-col h-screen">
       {/* Header */}
       <AppHeader
         left={
@@ -279,7 +279,7 @@ export function ListItemsPage() {
       />
 
       {/* Items */}
-      <main className="container max-w-2xl px-0">
+      <main className="container max-w-2xl px-0 flex-1 overflow-y-auto">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
