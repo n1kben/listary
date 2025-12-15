@@ -2,15 +2,29 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
 
     <!-- PWA Configuration -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="apple-mobile-web-app-title" content="Listary" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#252525" media="(prefers-color-scheme: dark)" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#252525"
+      media="(prefers-color-scheme: dark)"
+    />
 
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -20,30 +34,23 @@
     <title>Listary</title>
     <script>
       // Prevent flash of unstyled content by setting theme before React loads
-      (function() {
-        const theme = localStorage.getItem('listary-theme') || 'system';
+      (function () {
+        const theme = localStorage.getItem("listary-theme") || "system";
         const root = document.documentElement;
 
-        if (theme === 'dark') {
-          root.classList.add('dark');
-        } else if (theme === 'light') {
-          root.classList.add('light');
+        if (theme === "dark") {
+          root.classList.add("dark");
+        } else if (theme === "light") {
+          root.classList.add("light");
         } else {
           // system
-          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+            .matches
+            ? "dark"
+            : "light";
           root.classList.add(systemTheme);
         }
       })();
-
-      // Fix iOS 100vh issue by using window.innerHeight
-      function setAppHeight() {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
-      }
-
-      setAppHeight();
-      window.addEventListener('resize', setAppHeight);
-      window.addEventListener('orientationchange', setAppHeight);
     </script>
   </head>
   <body>

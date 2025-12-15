@@ -8,7 +8,6 @@ import {
   VisuallyHidden,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ClickableArea } from "@/components/ui/clickable-area";
 import { AppHeader } from "@/components/AppHeader";
 
 interface FullscreenDialogProps {
