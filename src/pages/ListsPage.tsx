@@ -7,6 +7,7 @@ import {
   List as ListIcon,
   ListPlus,
   Trash2,
+  Star,
 } from "lucide-react";
 import { useLists } from "@/contexts/ListContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -53,12 +54,14 @@ function SortableListItem({
   onEdit,
   isSelected,
   onToggleSelect,
+  isDefault,
 }: {
   list: List;
   isEditing: boolean;
   onEdit: (listId: string) => void;
   isSelected: boolean;
   onToggleSelect: (listId: string) => void;
+  isDefault: boolean;
 }) {
   const {
     attributes,
@@ -83,7 +86,11 @@ function SortableListItem({
     <div className="w-full flex items-center h-auto py-3 px-4 select-none">
       {!isEditing ? (
         <>
-          <ListIcon className="h-5 w-5 text-muted-foreground shrink-0" />
+          {isDefault ? (
+            <Star className="h-5 w-5 shrink-0 fill-secondary stroke-none" />
+          ) : (
+            <ListIcon className="h-5 w-5 text-secondary shrink-0" />
+          )}
           <span className="font-medium ml-3 flex-1">{list.name}</span>
           {totalCount > 0 && <Badge variant="secondary">{totalCount}</Badge>}
           <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0 ml-2" />
@@ -150,7 +157,12 @@ export function ListsPage() {
     }),
   );
 
-  const sortedLists = [...lists].sort((a, b) => a.order - b.order);
+  const sortedLists = [...lists].sort((a, b) => {
+    // Put default list at the top
+    if (a.id === defaultListId) return -1;
+    if (b.id === defaultListId) return 1;
+    return a.order - b.order;
+  });
   const defaultList = defaultListId
     ? lists.find((l) => l.id === defaultListId)
     : sortedLists[0];
@@ -307,6 +319,7 @@ export function ListsPage() {
                 onEdit={setEditingListId}
                 isSelected={selectedLists.has(list.id)}
                 onToggleSelect={handleToggleSelect}
+                isDefault={list.id === defaultListId}
               />
             ))}
           </SortableContext>
