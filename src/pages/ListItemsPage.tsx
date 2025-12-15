@@ -63,7 +63,7 @@ function SortableItem({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <div className="w-full flex items-center h-auto py-3 px-4">
+      <div className="w-full flex items-center h-auto py-3 px-4 select-none">
         {!isEditing ? (
           <>
             <Checkbox checked={item.completed} onCheckedChange={onToggle} className="h-5 w-5" />
@@ -262,15 +262,16 @@ export function ListItemsPage() {
       {/* Header */}
       <AppHeader
         left={
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-5 w-5" />
+          <Button variant="ghost" size="lg" className="h-11 w-11 rounded-none" onClick={() => navigate("/")}>
+            <ArrowLeft className="h-6 w-6" />
           </Button>
         }
         center={<h1 className="text-lg font-semibold">{list.name}</h1>}
         right={
           <Button
             variant="ghost"
-            size="sm"
+            size="lg"
+            className="h-11 rounded-none"
             onClick={() => handleEditingChange(!isEditing)}
           >
             {isEditing ? "Done" : "Edit"}

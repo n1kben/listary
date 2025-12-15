@@ -36,4 +36,12 @@ body {
 /* Prevent text selection during drag */
 .dragging * {
   user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Prevent text selection popup on touch for draggable items */
+[data-dnd-kit-draggable] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }

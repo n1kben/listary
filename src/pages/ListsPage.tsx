@@ -74,7 +74,7 @@ function SortableListItem({
   const totalCount = list.items.length;
 
   const content = (
-    <div className="w-full flex items-center h-auto py-3 px-4">
+    <div className="w-full flex items-center h-auto py-3 px-4 select-none">
       {!isEditing ? (
         <>
           <ListIcon className="h-5 w-5 text-muted-foreground shrink-0" />
@@ -227,8 +227,8 @@ export function ListsPage() {
             onCancel={() => setIsSettingsOpen(false)}
             onDone={() => setIsSettingsOpen(false)}
             trigger={
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
+              <Button variant="ghost" size="lg" className="h-11 w-11 rounded-none">
+                <Settings className="h-6 w-6" />
               </Button>
             }
           >
@@ -283,7 +283,8 @@ export function ListsPage() {
         right={
           <Button
             variant="ghost"
-            size="sm"
+            size="lg"
+            className="h-11 rounded-none"
             onClick={() => handleEditingChange(!isEditing)}
           >
             {isEditing ? "Done" : "Edit"}
@@ -354,8 +355,8 @@ export function ListsPage() {
               onDone={handleAddList}
               doneDisabled={!newListName.trim()}
               trigger={
-                <Button variant="ghost" size="icon">
-                  <ListPlus className="h-5 w-5" />
+                <Button variant="ghost" size="lg" className="h-11 w-11 rounded-none">
+                  <ListPlus className="h-6 w-6" />
                 </Button>
               }
             >
@@ -386,10 +387,11 @@ export function ListsPage() {
               trigger={
                 <Button
                   variant="ghost"
-                  size="icon"
+                  size="lg"
+                  className="h-11 w-11 rounded-none"
                   disabled={sortedLists.length === 0}
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-6 w-6" />
                 </Button>
               }
             />
