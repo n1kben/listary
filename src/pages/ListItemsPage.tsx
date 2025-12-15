@@ -109,7 +109,7 @@ function SortableItem({
 export function ListItemsPage() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
-  const { lists, addItems, toggleItem, deleteItem, reorderItems, moveItems, updateItems, updateItem } = useLists();
+  const { lists, addItems, toggleItem, deleteItem, deleteItems, reorderItems, moveItems, updateItems, updateItem } = useLists();
   const [isEditing, setIsEditing] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
@@ -176,9 +176,7 @@ export function ListItemsPage() {
   };
 
   const handleDeleteSelected = () => {
-    selectedItems.forEach((itemId) => {
-      deleteItem(list.id, itemId);
-    });
+    deleteItems(list.id, Array.from(selectedItems));
     setSelectedItems(new Set());
     setIsEditing(false);
   };
@@ -213,9 +211,8 @@ export function ListItemsPage() {
 
   const handleClearCompleted = () => {
     // Delete all completed items
-    completedItems.forEach((item) => {
-      deleteItem(list.id, item.id);
-    });
+    const completedItemIds = completedItems.map((item) => item.id);
+    deleteItems(list.id, completedItemIds);
     setIsEditing(false);
   };
 

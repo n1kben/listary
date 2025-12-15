@@ -129,8 +129,10 @@ export function ListsPage() {
     reorderLists,
     addList,
     addItem,
+    addItems,
     updateList,
     deleteList,
+    deleteLists,
     defaultListId,
     setDefaultListId,
   } = useLists();
@@ -180,9 +182,7 @@ export function ListsPage() {
   };
 
   const handleAddItems = (listId: string, items: string[]) => {
-    items.forEach((text) => {
-      addItem(listId, text);
-    });
+    addItems(listId, items);
   };
 
   const handleEditList = (listId: string, newName: string) => {
@@ -202,9 +202,7 @@ export function ListsPage() {
   };
 
   const handleDeleteSelected = () => {
-    selectedLists.forEach((listId) => {
-      deleteList(listId);
-    });
+    deleteLists(Array.from(selectedLists));
     setSelectedLists(new Set());
   };
 

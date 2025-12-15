@@ -9,11 +9,13 @@ interface ListContextType {
   setDefaultListId: (id: string | null) => void;
   addList: (name: string) => void;
   deleteList: (id: string) => void;
+  deleteLists: (ids: string[]) => void;
   updateList: (id: string, updates: Partial<List>) => void;
   reorderLists: (lists: List[]) => void;
   addItem: (listId: string, text: string) => void;
   addItems: (listId: string, texts: string[]) => void;
   deleteItem: (listId: string, itemId: string) => void;
+  deleteItems: (listId: string, itemIds: string[]) => void;
   toggleItem: (listId: string, itemId: string) => void;
   updateItem: (listId: string, itemId: string, updates: Partial<ListItem>) => void;
   updateItems: (listId: string, itemIds: string[], updates: Partial<ListItem>) => void;
@@ -88,6 +90,10 @@ export function ListProvider({ children }: { children: ReactNode }) {
     setLists(lists.filter(list => list.id !== id));
   };
 
+  const deleteLists = (ids: string[]) => {
+    setLists(prevLists => prevLists.filter(list => !ids.includes(list.id)));
+  };
+
   const updateList = (id: string, updates: Partial<List>) => {
     setLists(lists.map(list => (list.id === id ? { ...list, ...updates } : list)));
   };
@@ -137,6 +143,17 @@ export function ListProvider({ children }: { children: ReactNode }) {
       lists.map(list => {
         if (list.id === listId) {
           return { ...list, items: list.items.filter(item => item.id !== itemId) };
+        }
+        return list;
+      })
+    );
+  };
+
+  const deleteItems = (listId: string, itemIds: string[]) => {
+    setLists(prevLists =>
+      prevLists.map(list => {
+        if (list.id === listId) {
+          return { ...list, items: list.items.filter(item => !itemIds.includes(item.id)) };
         }
         return list;
       })
@@ -250,11 +267,13 @@ export function ListProvider({ children }: { children: ReactNode }) {
         setDefaultListId,
         addList,
         deleteList,
+        deleteLists,
         updateList,
         reorderLists,
         addItem,
         addItems,
         deleteItem,
+        deleteItems,
         toggleItem,
         updateItem,
         updateItems,
