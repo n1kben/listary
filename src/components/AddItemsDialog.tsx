@@ -92,8 +92,8 @@ export function AddItemsDialog({
       doneDisabled={!selectedListId || !newItemTexts.some((t) => t.trim())}
       trigger={
         trigger ?? (
-          <Button variant="ghost" size="icon">
-            <Plus className="h-5 w-5" />
+          <Button variant="ghost" size="header-icon-ios">
+            <Plus className="size-5" />
           </Button>
         )
       }

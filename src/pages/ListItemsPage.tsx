@@ -262,16 +262,15 @@ export function ListItemsPage() {
       {/* Header */}
       <AppHeader
         left={
-          <Button variant="ghost" size="lg" className="h-11 w-11 rounded-none" onClick={() => navigate("/")}>
-            <ArrowLeft className="h-6 w-6" />
+          <Button variant="ghost" size="header-icon-ios" onClick={() => navigate("/")}>
+            <ArrowLeft className="size-5" />
           </Button>
         }
         center={<h1 className="text-lg font-semibold">{list.name}</h1>}
         right={
           <Button
             variant="ghost"
-            size="lg"
-            className="h-11 rounded-none"
+            size="header-ios"
             onClick={() => handleEditingChange(!isEditing)}
           >
             {isEditing ? "Done" : "Edit"}
@@ -359,31 +358,31 @@ export function ListItemsPage() {
               {/* Complete/Uncomplete selected button */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="header-ios"
                 onClick={handleToggleCompleteSelected}
               >
-                <Check className="h-4 w-4 mr-2" />
+                <Check className="mr-2" />
                 {allSelectedCompleted ? "Uncomplete" : "Complete"}
               </Button>
 
               {/* Move selected button */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="header-ios"
                 onClick={() => setIsMoveDialogOpen(true)}
               >
-                <MoveRight className="h-4 w-4 mr-2" />
+                <MoveRight className="mr-2" />
                 Move
               </Button>
 
               {/* Remove all selected button */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="header-ios"
                 onClick={handleDeleteSelected}
                 className="text-destructive hover:text-destructive"
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="mr-2" />
                 Remove
               </Button>
             </div>
@@ -393,19 +392,19 @@ export function ListItemsPage() {
               {hasUncompletedItems ? (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="header-ios"
                   onClick={handleCompleteAll}
                 >
-                  <CheckCheck className="h-4 w-4 mr-2" />
+                  <CheckCheck className="mr-2" />
                   Complete (All)
                 </Button>
               ) : hasCompletedItems ? (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="header-ios"
                   onClick={handleUncompleteAll}
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2" />
                   Uncomplete (All)
                 </Button>
               ) : null}
@@ -414,10 +413,10 @@ export function ListItemsPage() {
               {hasCompletedItems && (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="header-ios"
                   onClick={handleClearCompleted}
                 >
-                  <X className="h-4 w-4 mr-2" />
+                  <X className="mr-2" />
                   Clear Completed
                 </Button>
               )}

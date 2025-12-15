@@ -30,7 +30,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
@@ -111,13 +117,7 @@ function SortableListItem({
 
   return (
     <div ref={setNodeRef} style={style}>
-      {isEditing ? (
-        content
-      ) : (
-        <Link to={`/list/${list.id}`}>
-          {content}
-        </Link>
-      )}
+      {isEditing ? content : <Link to={`/list/${list.id}`}>{content}</Link>}
       <Separator />
     </div>
   );
@@ -147,7 +147,7 @@ export function ListsPage() {
       activationConstraint: {
         distance: 8,
       },
-    })
+    }),
   );
 
   const sortedLists = [...lists].sort((a, b) => a.order - b.order);
@@ -227,8 +227,8 @@ export function ListsPage() {
             onCancel={() => setIsSettingsOpen(false)}
             onDone={() => setIsSettingsOpen(false)}
             trigger={
-              <Button variant="ghost" size="lg" className="h-11 w-11 rounded-none">
-                <Settings className="h-6 w-6" />
+              <Button variant="ghost" size="header-icon-ios">
+                <Settings className="size-5" />
               </Button>
             }
           >
@@ -283,8 +283,7 @@ export function ListsPage() {
         right={
           <Button
             variant="ghost"
-            size="lg"
-            className="h-11 rounded-none"
+            size="header-ios"
             onClick={() => handleEditingChange(!isEditing)}
           >
             {isEditing ? "Done" : "Edit"}
@@ -336,11 +335,11 @@ export function ListsPage() {
             {/* Remove button */}
             <Button
               variant="ghost"
-              size="sm"
+              size="header-ios"
               onClick={handleDeleteSelected}
               className="text-destructive hover:text-destructive"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="mr-2" />
               Remove
             </Button>
           </div>
@@ -355,8 +354,11 @@ export function ListsPage() {
               onDone={handleAddList}
               doneDisabled={!newListName.trim()}
               trigger={
-                <Button variant="ghost" size="lg" className="h-11 w-11 rounded-none">
-                  <ListPlus className="h-6 w-6" />
+                <Button
+                  variant="ghost"
+                  size="header-icon-ios"
+                >
+                  <ListPlus className="size-5" />
                 </Button>
               }
             >
@@ -387,11 +389,10 @@ export function ListsPage() {
               trigger={
                 <Button
                   variant="ghost"
-                  size="lg"
-                  className="h-11 w-11 rounded-none"
+                  size="header-icon-ios"
                   disabled={sortedLists.length === 0}
                 >
-                  <Plus className="h-6 w-6" />
+                  <Plus className="size-5" />
                 </Button>
               }
             />
