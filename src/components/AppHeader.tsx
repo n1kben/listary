@@ -9,7 +9,7 @@ interface AppHeaderProps {
 export function AppHeader({ left, center, right }: AppHeaderProps) {
   return (
     <>
-      <header className="shrink-0 border-b bg-background box-border fixed w-full h-15">
+      <header className="shrink-0 border-b bg-background box-border fixed w-full h-15 pt-[env(safe-area-inset-top)]">
         <div className="flex items-center justify-between">
           <div>{left}</div>
           <div>{center}</div>
