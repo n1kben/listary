@@ -3,48 +3,34 @@
   -webkit-touch-callout: none;
 }
 
-html {
+/* The Golden Rule: Only one element should scroll. Never let body scroll. */
+html, body {
   height: 100%;
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
+  margin: 0;
+  overflow: hidden; /* IMPORTANT */
 }
 
 body {
-  margin: 0;
   padding: 0;
-  height: var(--app-height, 100vh);
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overscroll-behavior: none;
 }
 
 #root {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  height: 100dvh; /* dynamic viewport */
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background);
 }
 
-/* iOS safe area support */
-@supports (padding: max(0px)) {
-  body {
-    padding-left: max(0px, env(safe-area-inset-left));
-    padding-right: max(0px, env(safe-area-inset-right));
-    padding-bottom: max(0px, env(safe-area-inset-bottom));
-  }
-}
-
-/* iOS momentum scrolling for scrollable content areas */
+/* The ONLY scrolling area */
 .scrollable-content {
-  overflow-y: scroll;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth momentum scroll */
 }
 
 /* Prevent text selection during drag */

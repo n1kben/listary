@@ -258,7 +258,7 @@ export function ListItemsPage() {
   const hasUncompletedItems = sortedItems.some(item => !item.completed);
 
   return (
-    <div className="flex flex-col h-screen">
+    <>
       {/* Header */}
       <AppHeader
         left={
@@ -476,6 +476,6 @@ export function ListItemsPage() {
           onSave={handleSaveItemEdit}
         />
       )}
-    </div>
+    </>
   );
 }

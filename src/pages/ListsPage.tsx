@@ -216,7 +216,7 @@ export function ListsPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <>
       {/* Header */}
       <AppHeader
         left={
@@ -396,6 +396,6 @@ export function ListsPage() {
           </>
         )}
       </AppFooter>
-    </div>
+    </>
   );
 }
