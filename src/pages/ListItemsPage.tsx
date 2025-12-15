@@ -109,7 +109,7 @@ function SortableItem({
 export function ListItemsPage() {
   const { listId } = useParams<{ listId: string }>();
   const navigate = useNavigate();
-  const { lists, addItems, toggleItem, deleteItem, deleteItems, reorderItems, moveItems, updateItems, updateItem } = useLists();
+  const { lists, addItems, toggleItem, deleteItems, reorderItems, moveItems, updateItems, updateItem } = useLists();
   const [isEditing, setIsEditing] = useState(false);
   const [hideCompleted, setHideCompleted] = useState(false);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());

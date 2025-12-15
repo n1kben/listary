@@ -1,2 +1,2 @@
 - Use shadcn for ui
-- After every major change run `pnpm check`
+- After every major change run `pnpm check`, `pnpm lint` and `pnpm build`
