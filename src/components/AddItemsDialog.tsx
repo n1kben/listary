@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,8 +29,21 @@ export function AddItemsDialog({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newItemTexts, setNewItemTexts] = useState<string[]>([""]);
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const lastInputRef = useRef<HTMLInputElement>(null);
+  const shouldFocusLastInput = useRef(false);
 
   const sortedLists = [...lists].sort((a, b) => a.order - b.order);
+
+  // Focus the last input when a new one is added
+  useEffect(() => {
+    if (shouldFocusLastInput.current && lastInputRef.current) {
+      // Small delay to ensure iOS recognizes the autocapitalize attribute
+      setTimeout(() => {
+        lastInputRef.current?.focus();
+        shouldFocusLastInput.current = false;
+      }, 50);
+    }
+  }, [newItemTexts.length]);
 
   const handleAddItems = () => {
     if (selectedListId) {
@@ -53,15 +66,23 @@ export function AddItemsDialog({
   ) => {
     if (e.key === "Enter") {
       e.preventDefault();
+
+      // Cmd+Enter (or Ctrl+Enter on non-Mac) submits the form
+      if (e.metaKey || e.ctrlKey) {
+        handleAddItems();
+        return;
+      }
+
+      // Plain Enter adds a new input field
       const currentText = newItemTexts[index];
       if (currentText?.trim()) {
-        // Add a new input field
         addNewItemInput();
       }
     }
   };
 
   const addNewItemInput = () => {
+    shouldFocusLastInput.current = true;
     setNewItemTexts([...newItemTexts, ""]);
   };
 
@@ -162,12 +183,15 @@ export function AddItemsDialog({
             {newItemTexts.map((text, index) => (
               <div key={index}>
                 <Input
+                  ref={index === newItemTexts.length - 1 ? lastInputRef : null}
                   placeholder="e.g. Milk, Bread..."
                   value={text}
                   onChange={(e) => updateItemText(index, e.target.value)}
                   onKeyDown={(e) => handleItemKeyDown(index, e)}
                   onPaste={(e) => handlePaste(index, e)}
-                  autoFocus={index === newItemTexts.length - 1}
+                  autoCapitalize="on"
+                  autoCorrect="off"
+                  autoComplete="off"
                   className="w-full border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-4 py-3 h-auto bg-transparent rounded-none"
                 />
                 {index < newItemTexts.length - 1 && <Separator />}
