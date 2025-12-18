@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ListsPage } from "@/pages/ListsPage";
 import { ListItemsPage } from "@/pages/ListItemsPage";
 import { AuthForm } from "@/components/AuthForm";
+import { MigrationHandler } from "@/components/MigrationHandler";
 import "./App.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -22,7 +23,12 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <AuthForm />;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <MigrationHandler />
+      {children}
+    </>
+  );
 }
 
 function App() {
