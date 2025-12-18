@@ -8,6 +8,7 @@ import { hasLocalStorageData } from '@/utils/migrateLocalStorage';
  * with existing localStorage data
  */
 export function MigrationHandler() {
+  /* eslint-disable react-hooks/set-state-in-effect */
   const { user } = useAuth();
   const [showMigration, setShowMigration] = useState(false);
   const [checkedUserId, setCheckedUserId] = useState<string | null>(null);
@@ -16,15 +17,11 @@ export function MigrationHandler() {
     // When user changes, check if we need to show migration
     if (user && user.id !== checkedUserId) {
       const hasData = hasLocalStorageData();
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowMigration(hasData);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCheckedUserId(user.id);
     } else if (!user) {
       // Reset when user logs out
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCheckedUserId(null);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowMigration(false);
     }
   }, [user, checkedUserId]);

@@ -12,6 +12,7 @@ import {
 import { useLists } from "@/contexts/ListContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -141,6 +142,7 @@ function SortableListItem({
 export function ListsPage() {
   const {
     lists,
+    loading,
     reorderLists,
     addList,
     addItems,
@@ -235,6 +237,10 @@ export function ListsPage() {
       setSelectedLists(new Set());
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner message="Loading your lists..." />;
+  }
 
   return (
     <>

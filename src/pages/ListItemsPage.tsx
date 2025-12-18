@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Trash2, MoveRight, ListTodo } from "lucide-react";
 import { useLists } from "@/contexts/ListContext";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
@@ -128,6 +129,7 @@ export function ListItemsPage() {
   const navigate = useNavigate();
   const {
     lists,
+    loading,
     addItems,
     toggleItem,
     deleteItems,
@@ -152,6 +154,10 @@ export function ListItemsPage() {
   );
 
   const list = lists.find((l) => l.id === listId);
+
+  if (loading) {
+    return <LoadingSpinner message="Loading items..." />;
+  }
 
   if (!list) {
     return (
