@@ -1,10 +1,12 @@
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useSupabaseLists } from '@/hooks/useSupabaseLists';
+import { useSupabasePreferences } from '@/hooks/useSupabasePreferences';
 import type { List, ListItem, PlacementPosition } from '@/types';
 
 interface ListContextType {
   lists: List[];
+  loading: boolean;
   defaultListId: string | null;
   setDefaultListId: (id: string | null) => void;
   newListPlacement: PlacementPosition;
@@ -40,274 +42,241 @@ const COLORS = [
   "#87CEEB",
 ];
 
-const INITIAL_LISTS: List[] = [
-  {
-    id: '1',
-    name: 'Shopping',
-    color: '#FF6B6B',
-    order: 0,
-    items: [
-      { id: '1-1', text: 'Milk', completed: false, order: 0 },
-      { id: '1-2', text: 'Bread', completed: true, order: 1 },
-      { id: '1-3', text: 'Eggs', completed: false, order: 2 },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Work Tasks',
-    color: '#4ECDC4',
-    order: 1,
-    items: [
-      { id: '2-1', text: 'Review PR', completed: false, order: 0 },
-      { id: '2-2', text: 'Team meeting', completed: true, order: 1 },
-    ],
-  },
-  {
-    id: '3',
-    name: 'Personal',
-    color: '#95E1D3',
-    order: 2,
-    items: [
-      { id: '3-1', text: 'Call mom', completed: false, order: 0 },
-    ],
-  },
-];
-
 export function ListProvider({ children }: { children: ReactNode }) {
-  const [lists, setLists] = useLocalStorage<List[]>('listary-lists', INITIAL_LISTS);
-  const [defaultListId, setDefaultListId] = useLocalStorage<string | null>('listary-default-list', null);
-  const [newListPlacement, setNewListPlacement] = useLocalStorage<PlacementPosition>('listary-new-list-placement', 'bottom');
-  const [newItemPlacement, setNewItemPlacement] = useLocalStorage<PlacementPosition>('listary-new-item-placement', 'bottom');
+  const {
+    lists,
+    loading: listsLoading,
+    addList: addListDb,
+    deleteList: deleteListDb,
+    deleteLists: deleteListsDb,
+    updateList: updateListDb,
+    reorderLists: reorderListsDb,
+    addItem: addItemDb,
+    addItems: addItemsDb,
+    deleteItem: deleteItemDb,
+    deleteItems: deleteItemsDb,
+    toggleItem: toggleItemDb,
+    updateItem: updateItemDb,
+    updateItems: updateItemsDb,
+    reorderItems: reorderItemsDb,
+    moveItems: moveItemsDb,
+  } = useSupabaseLists();
 
-  const addList = (name: string) => {
-    // Assign a random color from the palette
-    const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)] ?? "#FF6B6B";
-    const newList: List = {
-      id: Date.now().toString(),
-      name,
-      color: randomColor,
-      order: newListPlacement === 'top' ? 0 : lists.length,
-      items: [],
-    };
+  const {
+    defaultListId,
+    newListPlacement,
+    newItemPlacement,
+    loading: prefsLoading,
+    setDefaultListId: setDefaultListIdDb,
+    setNewListPlacement: setNewListPlacementDb,
+    setNewItemPlacement: setNewItemPlacementDb,
+  } = useSupabasePreferences();
 
-    if (newListPlacement === 'top') {
-      // Add to top and reorder existing lists
-      const updatedLists = lists.map(list => ({ ...list, order: list.order + 1 }));
-      setLists([newList, ...updatedLists]);
-    } else {
-      // Add to bottom (default behavior)
-      setLists([...lists, newList]);
+  const loading = listsLoading || prefsLoading;
+
+  const setDefaultListId = async (id: string | null) => {
+    try {
+      await setDefaultListIdDb(id);
+    } catch (error) {
+      console.error('Error setting default list:', error);
     }
   };
 
-  const deleteList = (id: string) => {
-    setLists(lists.filter(list => list.id !== id));
+  const setNewListPlacement = async (position: PlacementPosition) => {
+    try {
+      await setNewListPlacementDb(position);
+    } catch (error) {
+      console.error('Error setting new list placement:', error);
+    }
   };
 
-  const deleteLists = (ids: string[]) => {
-    setLists(prevLists => prevLists.filter(list => !ids.includes(list.id)));
+  const setNewItemPlacement = async (position: PlacementPosition) => {
+    try {
+      await setNewItemPlacementDb(position);
+    } catch (error) {
+      console.error('Error setting new item placement:', error);
+    }
   };
 
-  const updateList = (id: string, updates: Partial<List>) => {
-    setLists(lists.map(list => (list.id === id ? { ...list, ...updates } : list)));
+  const addList = async (name: string) => {
+    try {
+      // Assign a random color from the palette
+      const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)] ?? "#FF6B6B";
+      const order = newListPlacement === 'top' ? 0 : lists.length;
+
+      // If adding to top, we need to reorder existing lists
+      if (newListPlacement === 'top') {
+        const reorderedLists = lists.map((list, index) => ({
+          id: list.id,
+          order: index + 1,
+        }));
+        await Promise.all([
+          addListDb(name, randomColor, order),
+          reorderListsDb(reorderedLists),
+        ]);
+      } else {
+        await addListDb(name, randomColor, order);
+      }
+    } catch (error) {
+      console.error('Error adding list:', error);
+    }
   };
 
-  const reorderLists = (newLists: List[]) => {
-    setLists(newLists.map((list, index) => ({ ...list, order: index })));
+  const deleteList = async (id: string) => {
+    try {
+      await deleteListDb(id);
+    } catch (error) {
+      console.error('Error deleting list:', error);
+    }
   };
 
-  const addItem = (listId: string, text: string) => {
-    setLists(prevLists =>
-      prevLists.map(list => {
-        if (list.id === listId) {
-          // Use timestamp + random string to ensure unique IDs
-          const uniqueId = `${listId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-          const newItem: ListItem = {
-            id: uniqueId,
-            text,
-            completed: false,
-            order: newItemPlacement === 'top' ? 0 : list.items.length,
-          };
-
-          if (newItemPlacement === 'top') {
-            // Add to top and reorder existing items
-            const updatedItems = list.items.map(item => ({ ...item, order: item.order + 1 }));
-            return { ...list, items: [newItem, ...updatedItems] };
-          } else {
-            // Add to bottom (default behavior)
-            return { ...list, items: [...list.items, newItem] };
-          }
-        }
-        return list;
-      })
-    );
+  const deleteLists = async (ids: string[]) => {
+    try {
+      await deleteListsDb(ids);
+    } catch (error) {
+      console.error('Error deleting lists:', error);
+    }
   };
 
-  const addItems = (listId: string, texts: string[]) => {
-    setLists(prevLists =>
-      prevLists.map(list => {
-        if (list.id === listId) {
-          const newItems: ListItem[] = texts.map((text, index) => ({
-            id: `${listId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-            text,
-            completed: false,
-            order: newItemPlacement === 'top' ? index : list.items.length + index,
-          }));
-
-          if (newItemPlacement === 'top') {
-            // Add to top and reorder existing items
-            const updatedItems = list.items.map(item => ({
-              ...item,
-              order: item.order + newItems.length
-            }));
-            return { ...list, items: [...newItems, ...updatedItems] };
-          } else {
-            // Add to bottom (default behavior)
-            return { ...list, items: [...list.items, ...newItems] };
-          }
-        }
-        return list;
-      })
-    );
+  const updateList = async (id: string, updates: Partial<List>) => {
+    try {
+      await updateListDb(id, updates);
+    } catch (error) {
+      console.error('Error updating list:', error);
+    }
   };
 
-  const deleteItem = (listId: string, itemId: string) => {
-    setLists(
-      lists.map(list => {
-        if (list.id === listId) {
-          return { ...list, items: list.items.filter(item => item.id !== itemId) };
-        }
-        return list;
-      })
-    );
+  const reorderLists = async (newLists: List[]) => {
+    try {
+      const reorderedLists = newLists.map((list, index) => ({
+        id: list.id,
+        order: index,
+      }));
+      await reorderListsDb(reorderedLists);
+    } catch (error) {
+      console.error('Error reordering lists:', error);
+    }
   };
 
-  const deleteItems = (listId: string, itemIds: string[]) => {
-    setLists(prevLists =>
-      prevLists.map(list => {
-        if (list.id === listId) {
-          return { ...list, items: list.items.filter(item => !itemIds.includes(item.id)) };
-        }
-        return list;
-      })
-    );
+  const addItem = async (listId: string, text: string) => {
+    try {
+      const list = lists.find((l) => l.id === listId);
+      if (!list) return;
+
+      const order = newItemPlacement === 'top' ? 0 : list.items.length;
+
+      // If adding to top, we need to reorder existing items
+      if (newItemPlacement === 'top' && list.items.length > 0) {
+        const reorderedItems = list.items.map((item, index) => ({
+          id: item.id,
+          order: index + 1,
+        }));
+        await Promise.all([
+          addItemDb(listId, text, order),
+          reorderItemsDb(reorderedItems),
+        ]);
+      } else {
+        await addItemDb(listId, text, order);
+      }
+    } catch (error) {
+      console.error('Error adding item:', error);
+    }
   };
 
-  const toggleItem = (listId: string, itemId: string) => {
-    setLists(
-      lists.map(list => {
-        if (list.id === listId) {
-          return {
-            ...list,
-            items: list.items.map(item =>
-              item.id === itemId ? { ...item, completed: !item.completed } : item
-            ),
-          };
-        }
-        return list;
-      })
-    );
-  };
+  const addItems = async (listId: string, texts: string[]) => {
+    try {
+      const list = lists.find((l) => l.id === listId);
+      if (!list) return;
 
-  const updateItem = (listId: string, itemId: string, updates: Partial<ListItem>) => {
-    setLists(prevLists =>
-      prevLists.map(list => {
-        if (list.id === listId) {
-          return {
-            ...list,
-            items: list.items.map(item =>
-              item.id === itemId ? { ...item, ...updates } : item
-            ),
-          };
-        }
-        return list;
-      })
-    );
-  };
-
-  const updateItems = (listId: string, itemIds: string[], updates: Partial<ListItem>) => {
-    setLists(prevLists =>
-      prevLists.map(list => {
-        if (list.id === listId) {
-          return {
-            ...list,
-            items: list.items.map(item =>
-              itemIds.includes(item.id) ? { ...item, ...updates } : item
-            ),
-          };
-        }
-        return list;
-      })
-    );
-  };
-
-  const reorderItems = (listId: string, newItems: ListItem[]) => {
-    setLists(
-      lists.map(list => {
-        if (list.id === listId) {
-          return {
-            ...list,
-            items: newItems.map((item, index) => ({ ...item, order: index })),
-          };
-        }
-        return list;
-      })
-    );
-  };
-
-  const moveItems = (fromListId: string, toListId: string, itemIds: string[]) => {
-    setLists(prevLists => {
-      const fromList = prevLists.find(list => list.id === fromListId);
-      const toList = prevLists.find(list => list.id === toListId);
-
-      if (!fromList || !toList) return prevLists;
-
-      // Get the items to move
-      const itemsToMove = fromList.items.filter(item => itemIds.includes(item.id));
-
-      // Create new items with new IDs for the target list
-      const newItems: ListItem[] = itemsToMove.map((item, index) => ({
-        ...item,
-        id: `${toListId}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-        order: newItemPlacement === 'top' ? index : toList.items.length + index,
+      const items = texts.map((text, index) => ({
+        text,
+        order: newItemPlacement === 'top' ? index : list.items.length + index,
       }));
 
-      return prevLists.map(list => {
-        if (list.id === fromListId) {
-          // Remove items from source list
-          return {
-            ...list,
-            items: list.items.filter(item => !itemIds.includes(item.id)),
-          };
-        }
-        if (list.id === toListId) {
-          if (newItemPlacement === 'top') {
-            // Add to top and reorder existing items
-            const updatedItems = list.items.map(item => ({
-              ...item,
-              order: item.order + newItems.length
-            }));
-            return {
-              ...list,
-              items: [...newItems, ...updatedItems],
-            };
-          } else {
-            // Add to bottom (default behavior)
-            return {
-              ...list,
-              items: [...list.items, ...newItems],
-            };
-          }
-        }
-        return list;
-      });
-    });
+      // If adding to top, we need to reorder existing items
+      if (newItemPlacement === 'top' && list.items.length > 0) {
+        const reorderedItems = list.items.map((item, index) => ({
+          id: item.id,
+          order: index + texts.length,
+        }));
+        await Promise.all([
+          addItemsDb(listId, items),
+          reorderItemsDb(reorderedItems),
+        ]);
+      } else {
+        await addItemsDb(listId, items);
+      }
+    } catch (error) {
+      console.error('Error adding items:', error);
+    }
+  };
+
+  const deleteItem = async (_listId: string, itemId: string) => {
+    try {
+      await deleteItemDb(itemId);
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
+  };
+
+  const deleteItems = async (_listId: string, itemIds: string[]) => {
+    try {
+      await deleteItemsDb(itemIds);
+    } catch (error) {
+      console.error('Error deleting items:', error);
+    }
+  };
+
+  const toggleItem = async (_listId: string, itemId: string) => {
+    try {
+      await toggleItemDb(itemId);
+    } catch (error) {
+      console.error('Error toggling item:', error);
+    }
+  };
+
+  const updateItem = async (_listId: string, itemId: string, updates: Partial<ListItem>) => {
+    try {
+      await updateItemDb(itemId, updates);
+    } catch (error) {
+      console.error('Error updating item:', error);
+    }
+  };
+
+  const updateItems = async (_listId: string, itemIds: string[], updates: Partial<ListItem>) => {
+    try {
+      const itemUpdates = itemIds.map((id) => ({ id, ...updates }));
+      await updateItemsDb(itemUpdates);
+    } catch (error) {
+      console.error('Error updating items:', error);
+    }
+  };
+
+  const reorderItems = async (_listId: string, newItems: ListItem[]) => {
+    try {
+      const reorderedItems = newItems.map((item, index) => ({
+        id: item.id,
+        order: index,
+      }));
+      await reorderItemsDb(reorderedItems);
+    } catch (error) {
+      console.error('Error reordering items:', error);
+    }
+  };
+
+  const moveItems = async (_fromListId: string, toListId: string, itemIds: string[]) => {
+    try {
+      await moveItemsDb(itemIds, toListId);
+    } catch (error) {
+      console.error('Error moving items:', error);
+    }
   };
 
   return (
     <ListContext.Provider
       value={{
         lists,
+        loading,
         defaultListId,
         setDefaultListId,
         newListPlacement,

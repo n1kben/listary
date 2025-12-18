@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useLists } from "@/contexts/ListContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -153,6 +154,7 @@ export function ListsPage() {
     setNewItemPlacement,
   } = useLists();
   const { theme, setTheme } = useTheme();
+  const { signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isListDialogOpen, setIsListDialogOpen] = useState(false);
@@ -342,6 +344,20 @@ export function ListsPage() {
                     <SelectItem value="bottom">At Bottom</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Sign Out */}
+              <div className="px-4 py-3">
+                <Button
+                  variant="destructive"
+                  className="w-full"
+                  onClick={async () => {
+                    await signOut();
+                    setIsSettingsOpen(false);
+                  }}
+                >
+                  Sign Out
+                </Button>
               </div>
             </div>
           </FullscreenDialog>

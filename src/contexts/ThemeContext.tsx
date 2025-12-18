@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
-
-type Theme = 'light' | 'dark' | 'system';
+import { useSupabasePreferences, type Theme } from '@/hooks/useSupabasePreferences';
 
 interface ThemeContextType {
   theme: Theme;
@@ -11,13 +10,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('listary-theme');
-    if (stored === 'light' || stored === 'dark' || stored === 'system') {
-      return stored;
-    }
-    return 'system';
-  });
+  const { theme, setTheme: setThemeDb } = useSupabasePreferences();
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -31,12 +24,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
+  const setTheme = async (newTheme: Theme) => {
+    try {
+      await setThemeDb(newTheme);
+    } catch (error) {
+      console.error('Error setting theme:', error);
+    }
+  };
+
   const value = {
     theme,
-    setTheme: (newTheme: Theme) => {
-      localStorage.setItem('listary-theme', newTheme);
-      setTheme(newTheme);
-    },
+    setTheme,
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
